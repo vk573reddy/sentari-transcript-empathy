@@ -1,0 +1,33 @@
+{
+  "name": "sentari-transcript-empathy",
+  "version": "1.0.0",
+  "description": "Sentari Group Interview - Transcript to Empathy Pipeline - Team Vijayasimha",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "npm run build && node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "simulate:first": "npm run build && node -e \"require('./dist/pipeline.js').simulateFirst()\"",
+    "simulate:hundred": "npm run build && node -e \"require('./dist/pipeline.js').simulateHundred()\"",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "serve": "npm run build && node dist/server.js"
+  },
+  "keywords": ["sentari", "empathy", "ai", "transcript", "vijayasimha"],
+  "author": "Team Vijayasimha - Associate Lead",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/express": "^4.17.17",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "jest": "^29.0.0",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  }
+}
