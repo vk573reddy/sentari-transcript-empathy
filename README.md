@@ -117,6 +117,34 @@ npm run serve
 open http://localhost:3000
 ```
 
+## 🗄️ Supabase Backend (Optional)
+
+The project includes a complete Supabase backend implementation with:
+
+- **PostgreSQL Database**: Persistent storage with row-level security
+- **User Authentication**: Secure registration/login with JWT
+- **Vector Similarity**: Advanced carry-in detection using pgvector
+- **Rich Analytics**: Theme analysis and personalized insights
+
+### Setup
+1. Create a [Supabase](https://supabase.com) project
+2. Copy `env.example` to `.env` and add your Supabase credentials:
+   ```env
+   SUPABASE_URL=https://your-project.supabase.co
+   SUPABASE_ANON_KEY=your-anon-key
+   SUPABASE_SERVICE_KEY=your-service-key
+   ```
+3. Run the SQL schema from `src/config/database.ts` in Supabase SQL Editor
+4. Enable the `vector` extension for embedding similarity
+5. Start with: `npm run dev` (uses `src/server-supabase.ts`)
+
+### API Endpoints
+- `POST /api/auth/register` - User registration
+- `POST /api/auth/login` - User login  
+- `POST /api/transcripts/process` - Process diary entries
+- `GET /api/transcripts/entries` - Retrieve user entries
+- `GET /api/insights/themes` - Theme analysis
+
 ## 📂 Project Structure
 
 ```
