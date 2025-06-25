@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1750722511454" clover="3.2.0">
-  <project timestamp="1750722511454" name="All files">
+<coverage generated="1750821063285" clover="3.2.0">
+  <project timestamp="1750821063285" name="All files">
     <metrics statements="217" coveredstatements="178" conditionals="108" coveredconditionals="87" methods="31" coveredmethods="29" elements="356" coveredelements="294" complexity="0" loc="217" ncloc="217" packages="1" files="1" classes="1"/>
-    <file name="pipeline.ts" path="/Users/vijayasimhareddy/sentari-transcript-empathy/src/pipeline.ts">
+    <file name="pipeline.ts" path="/Users/agupta4/Projects/Sentari/FinalInterview/sentari-transcript-empathy/src/pipeline.ts">
       <metrics statements="217" coveredstatements="178" conditionals="108" coveredconditionals="87" methods="31" coveredmethods="29"/>
       <line num="5" count="1" type="stmt"/>
       <line num="45" count="1" type="stmt"/>
