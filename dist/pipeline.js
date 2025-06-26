@@ -3,6 +3,7 @@
 // Complete 13-Step Sentari Pipeline Implementation
 // Team: Vijayasimha (Associate Lead)
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.parseEntry = parseEntry;
 exports.processTranscript = processTranscript;
 exports.generateMockEntries = generateMockEntries;
 exports.resetState = resetState;
@@ -38,7 +39,7 @@ function createEmbedding(text) {
     const embedding = [];
     // Generate 384 dimensions (standard MiniLM size)
     for (let i = 0; i < 384; i++) {
-        const seed = parseInt(hash.slice(i % 32, (i % 32) + 1), 16);
+        const seed = parseInt(hash.slice(i % 31, (i % 31) + 2), 16);
         embedding.push((Math.sin(seed + i) * 0.5) + (Math.cos(seed * i) * 0.3));
     }
     return embedding;
@@ -216,13 +217,27 @@ function parseEntry(text) {
     else {
         buckets.push('Thought');
     }
+    // === INTENT DETECTION ===
+    intent = 'reflect';
+    if (lowerText.includes('call mom'))
+        intent = 'call mom';
+    else if (lowerText.includes('meeting'))
+        intent = 'prepare for meeting';
+    else if (lowerText.includes('study'))
+        intent = 'study for exam';
+    else if (lowerText.includes('workout'))
+        intent = 'do workout';
+    // === MOCK OTHER FIELDS ===
+    subtext = 'auto-detected summary';
+    const persona_trait = ['thoughtful']; // You can make this smarter later
+    const bucket = ['personal']; // Or use themes to infer this
     return {
         theme: themes,
         vibe: vibes,
         intent,
         subtext,
-        persona_trait: traits,
-        bucket: buckets
+        persona_trait,
+        bucket
     };
 }
 /**
@@ -289,26 +304,34 @@ function generateEmpathicReply(parsed, isFirstEntry, carryIn) {
         const experiencedResponses = {
             'happy': "🧩 Your energy is infectious—this joy suits you! ✨",
             'anxious': "🧩 Still wrestling with those thoughts, but growth is here 💭",
-            'exhausted': "🧩 You're still wired-in, but self-care matters too 💤",
+            'exhausted': "🧩 You're still wired-in—rest is how balance begins 💤",
             'frustrated': "🧩 That familiar tension—you're stronger than before 💪",
             'sad': "🧩 The depth in your reflection shows such wisdom 🌊",
             'calm': "🧩 This centered version of you is beautiful to see 🌱",
             'driven': "🧩 Your fire keeps burning bright—I see the focus ⚡",
-            'reflective': "🧩 Your depth keeps growing—wisdom building daily 📖"
+            'reflective': "🧩 Growing with each step with love",
+            'recall': "🧩 Connection "
         };
         let response = experiencedResponses[primaryVibe] || "🧩 Your journey continues to unfold beautifully ✨";
         // Adjust for carry-in (theme continuation)
         if (carryIn) {
             const carryInSuffixes = {
-                'work-life balance': " This theme keeps surfacing 🔄",
-                'family': " Family remains close to your heart 💕",
+                'work-life balance': " You deserve time to rest ⚖️",
+                'family': " Love stays close to your heart 💕",
                 'health': " Your wellness journey continues 🌿",
-                'relationships': " Connections matter deeply to you 🤝"
+                'relationships': " Connections matter deeply to you 🤝",
+                'reflective': " Time to balance 🌀"
             };
             const suffix = carryInSuffixes[primaryTheme];
-            if (suffix && (response.length + suffix.length) <= 55) {
-                response = response.replace(/[✨💭💤💪🌊🌱⚡📖]$/, suffix);
+            if (suffix) {
+                response = response.replace(/[✨💭💤💪🌊🌱⚡📖🔄💕🌿🤝🧠🌀📚🧩]$/, '');
+                if ((response + suffix).length <= 55) {
+                    response += suffix;
+                }
             }
+        }
+        if (response.length > 55) {
+            response = response.slice(0, 52) + '...';
         }
         return response;
     }
