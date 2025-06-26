@@ -241,7 +241,7 @@ export async function requireCompleteProfile(req: AuthRequest, res: Response, ne
 
 // Generate custom JWT for additional security (optional)
 export function generateCustomJWT(payload: object): string {
-  const options: SignOptions = { expiresIn: JWT_EXPIRES_IN };
+  const options: SignOptions = { expiresIn: JWT_EXPIRES_IN as SignOptions['expiresIn'] };
   return jwt.sign(payload, JWT_SECRET, options) as string;
 }
 
