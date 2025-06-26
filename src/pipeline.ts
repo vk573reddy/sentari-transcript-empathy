@@ -521,6 +521,13 @@ export function resetState(): void {
 }
 
 /**
+ * Get all current diary entries
+ */
+export function getEntries(): DiaryEntry[] {
+  return [...entries]; // Return a copy to prevent external modification
+}
+
+/**
  * Simulate first entry (no prior history)
  */
 export async function simulateFirst(): Promise<void> {
