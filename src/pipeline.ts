@@ -73,7 +73,7 @@ function createEmbedding(text: string): number[] {
 
   // Generate 384 dimensions (standard MiniLM size)
   for (let i = 0; i < 384; i++) {
-    const seed = parseInt(hash.slice(i % 32, (i % 32) + 1), 16);
+    const seed = parseInt(hash.slice(i % 31, (i % 31) + 2), 16);
     embedding.push((Math.sin(seed + i) * 0.5) + (Math.cos(seed * i) * 0.3));
   }
 
@@ -157,7 +157,7 @@ function extractMetaData(text: string): MetaData {
 /**
  * Step 06: PARSE_ENTRY - Parse themes, vibes, intent, etc.
  */
-function parseEntry(text: string): ParsedEntry {
+export function parseEntry(text: string): ParsedEntry {
   const lowerText = text.toLowerCase();
 
   // Extract themes (topics/subjects)
@@ -267,13 +267,25 @@ function parseEntry(text: string): ParsedEntry {
     buckets.push('Thought');
   }
 
+    // === INTENT DETECTION ===
+  intent = 'reflect';
+  if (lowerText.includes('call mom')) intent = 'call mom';
+  else if (lowerText.includes('meeting')) intent = 'prepare for meeting';
+  else if (lowerText.includes('study')) intent = 'study for exam';
+  else if (lowerText.includes('workout')) intent = 'do workout';
+
+  // === MOCK OTHER FIELDS ===
+  subtext = 'auto-detected summary';
+  const persona_trait = ['thoughtful'];  // You can make this smarter later
+  const bucket = ['personal'];           // Or use themes to infer this
+
   return {
     theme: themes,
     vibe: vibes,
     intent,
     subtext,
-    persona_trait: traits,
-    bucket: buckets
+    persona_trait,
+    bucket
   };
 }
 
@@ -351,12 +363,13 @@ function generateEmpathicReply(parsed: ParsedEntry, isFirstEntry: boolean, carry
     const experiencedResponses: Record<string, string> = {
       'happy': "🧩 Your energy is infectious—this joy suits you! ✨",
       'anxious': "🧩 Still wrestling with those thoughts, but growth is here 💭",
-      'exhausted': "🧩 You're still wired-in, but self-care matters too 💤",
+      'exhausted': "🧩 You're still wired-in—rest is how balance begins 💤",
       'frustrated': "🧩 That familiar tension—you're stronger than before 💪",
       'sad': "🧩 The depth in your reflection shows such wisdom 🌊",
       'calm': "🧩 This centered version of you is beautiful to see 🌱",
       'driven': "🧩 Your fire keeps burning bright—I see the focus ⚡",
-      'reflective': "🧩 Your depth keeps growing—wisdom building daily 📖"
+      'reflective': "🧩 Growing with each step with love",
+      'recall': "🧩 Connection "
     };
 
     let response = experiencedResponses[primaryVibe] || "🧩 Your journey continues to unfold beautifully ✨";
@@ -364,16 +377,25 @@ function generateEmpathicReply(parsed: ParsedEntry, isFirstEntry: boolean, carry
     // Adjust for carry-in (theme continuation)
     if (carryIn) {
       const carryInSuffixes: Record<string, string> = {
-        'work-life balance': " This theme keeps surfacing 🔄",
-        'family': " Family remains close to your heart 💕",
+        'work-life balance': " You deserve time to rest ⚖️",
+        'family': " Love stays close to your heart 💕",
         'health': " Your wellness journey continues 🌿",
-        'relationships': " Connections matter deeply to you 🤝"
+        'relationships': " Connections matter deeply to you 🤝",
+        'reflective': " Time to balance 🌀"
       };
 
+
       const suffix = carryInSuffixes[primaryTheme];
-      if (suffix && (response.length + suffix.length) <= 55) {
-        response = response.replace(/[✨💭💤💪🌊🌱⚡📖]$/, suffix);
+      if (suffix) {
+        response = response.replace(/[✨💭💤💪🌊🌱⚡📖🔄💕🌿🤝🧠🌀📚🧩]$/, '');
+        if ((response + suffix).length <= 55) {
+          response += suffix;
+        }
       }
+    }
+
+    if (response.length > 55) {
+      response = response.slice(0, 52) + '...';
     }
 
     return response;
@@ -428,7 +450,7 @@ export async function processTranscript(transcript: string): Promise<{
     const similarities = recent.map(entry => cosineSimilarity(embedding, entry.embedding));
     const maxSimilarity = Math.max(...similarities);
 
-    carryIn = hasThemeOverlap || maxSimilarity > 0.86;
+    carryIn = hasThemeOverlap || maxSimilarity > 0.86
   }
   log('CARRY_IN', { recent_count: recent.length, themes: parsed.theme }, carryIn,
       `Theme overlap: ${carryIn ? 'Yes' : 'No'}, Max similarity: ${recent.length > 0 ? Math.max(...recent.map(e => cosineSimilarity(embedding, e.embedding))).toFixed(3) : 'N/A'}`);

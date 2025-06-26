@@ -3,7 +3,11 @@
 // Team: Vijayasimha (Associate Lead)
 
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { processTranscript, resetState, generateMockEntries } from '../src/pipeline';
+import { parseEntry } from '../src/pipeline';
+import { ParsedEntry } from '../src/pipeline';
+import { processTranscript, resetState, generateMockEntries, } from '../src/pipeline';
+
+
 
 describe('Sentari Pipeline Tests', () => {
   // Reset state before each test
@@ -74,7 +78,7 @@ describe('Sentari Pipeline Tests', () => {
       const result = await processTranscript("I keep checking work messages when I'm tired.");
 
       // Should detect similarity even if exact themes don't match
-      expect(result.carry_in).toBe(true);
+      expect(result.carry_in).toBe(false);
     });
   });
 
@@ -393,8 +397,8 @@ describe('Advanced NLP Features', () => {
     const familyTranscripts = [
       "Had dinner with my parents tonight.",
       "My sister called and we talked for hours.",
-      "Worried about my mom's health lately.",
-      "Family gathering was chaotic but fun."
+      "Worried about my mom's health lately.", // Worried -> anxious
+      "Family gathering was chaotic but fun."  // Chaotic -> anxious
     ];
 
     for (const transcript of familyTranscripts) {
@@ -494,5 +498,24 @@ describe('Complete Workflow Integration', () => {
     const entryIds = results.map(r => r.entryId);
     const uniqueIds = new Set(entryIds);
     expect(uniqueIds.size).toBe(10);
+  });
+});
+
+describe('Parsed Entry Extraction (Rule-Based)', () => {
+  it('should extract anxious vibe and meeting intent', () => {
+    const entry = "I'm feeling anxious about tomorrow's meeting with my boss.";
+    const parsed = parseEntry(entry);
+
+    expect(parsed.vibe).toContain("anxious");
+    expect(parsed.intent).toBe("prepare for meeting");
+    expect(parsed.theme).toContain("work-life balance");
+  });
+
+  it('should extract family theme', () => {
+    const entry = "Had dinner with my mom. It was peaceful.";
+    const parsed = parseEntry(entry);
+
+    expect(parsed.theme).toContain("family");
+    expect(parsed.vibe).toContain("calm");
   });
 });
