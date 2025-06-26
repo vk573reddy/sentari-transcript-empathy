@@ -372,6 +372,98 @@ app.get('/', (req, res) => {
                 font-weight: bold;
             }
 
+            .diary-entries-section {
+                background: #f8f9fa;
+                border-radius: 10px;
+                padding: 20px;
+                margin-top: 30px;
+                border-left: 5px solid #28a745;
+            }
+
+            .entries-header {
+                color: #2c3e50;
+                font-size: 1.3rem;
+                margin-bottom: 15px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                white-space: nowrap;
+            }
+
+            .entries-container {
+                background: white;
+                border-radius: 8px;
+                padding: 15px;
+                max-height: 500px;
+                overflow-y: auto;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            }
+
+            .entry-item {
+                background: #f8f9fa;
+                border-radius: 8px;
+                padding: 15px;
+                margin: 10px 0;
+                border-left: 4px solid #28a745;
+                transition: all 0.2s ease;
+            }
+
+            .entry-item:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            }
+
+            .entry-text {
+                color: #2c3e50;
+                font-size: 1rem;
+                line-height: 1.6;
+                margin-bottom: 10px;
+            }
+
+            .entry-meta {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 0.85rem;
+                color: #7f8c8d;
+            }
+
+            .entry-themes {
+                display: flex;
+                gap: 5px;
+                flex-wrap: wrap;
+            }
+
+            .entry-theme {
+                background: #3498db;
+                color: white;
+                padding: 2px 8px;
+                border-radius: 12px;
+                font-size: 0.75rem;
+            }
+
+            .entry-vibe {
+                background: #e74c3c;
+                color: white;
+                padding: 2px 8px;
+                border-radius: 12px;
+                font-size: 0.75rem;
+            }
+
+            .btn-refresh {
+                background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .btn-refresh:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+            }
+
             .loading {
                 display: none;
                 text-align: center;
@@ -548,6 +640,19 @@ app.get('/', (req, res) => {
                     <div class="logs-container" id="logs">
                         <div style="color: #95a5a6; text-align: center; padding: 20px;">
                             No logs yet. Process an entry to see the 13-step pipeline execution.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="diary-entries-section">
+                    <div class="entries-header">
+                        📝 Diary Entries (<span id="entryCount">0</span>)<button onclick="loadEntries()" class="btn-refresh" style="margin-left: 10px; padding: 5px 10px; font-size: 12px;">
+                            🔄 Refresh
+                        </button>
+                    </div>
+                    <div class="entries-container" id="entries">
+                        <div style="color: #95a5a6; text-align: center; padding: 20px;">
+                            No entries yet. Process some diary entries to see them here.
                         </div>
                     </div>
                 </div>
@@ -865,24 +970,29 @@ app.get('/', (req, res) => {
             }
 
             async function resetData() {
-                if (!confirm('Are you sure you want to reset all data? This will clear all entries and profile data.')) {
-                    return;
-                }
-
                 try {
+                    showLoading(true);
+                    
                     const response = await fetch('/api/reset', { method: 'POST' });
-                    if (response.ok) {
-                        alert('Data reset successfully');
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        showMessage('✅ All data reset successfully!', 'success');
+                        
+                        // Clear results
                         document.getElementById('result').classList.remove('show');
-                        document.getElementById('logs').innerHTML = \`
-                            <div style="color: #95a5a6; text-align: center; padding: 20px;">
-                                Data reset complete. Process an entry to see the 13-step pipeline execution.
-                            </div>
-                        \`;
+                        document.getElementById('logs').innerHTML = '<div style="color: #95a5a6; text-align: center; padding: 20px;">No logs yet. Process an entry to see the 13-step pipeline execution.</div>';
+                        
+                        // Refresh diary entries display
+                        loadEntries();
+                    } else {
+                        showMessage('❌ Failed to reset data', 'error');
                     }
                 } catch (error) {
-                    console.error('Error:', error);
-                    alert('Error resetting data: ' + error.message);
+                    console.error('Error resetting data:', error);
+                    showMessage('❌ Error resetting data', 'error');
+                } finally {
+                    showLoading(false);
                 }
             }
 
@@ -906,14 +1016,17 @@ app.get('/', (req, res) => {
                 document.getElementById('response').textContent = result.response_text;
                 document.getElementById('entryId').textContent = result.entryId;
                 document.getElementById('carryIn').textContent = result.carry_in ? '✅ Yes' : '❌ No';
-                document.getElementById('responseLength').textContent = \`\${result.response_text.length}/55 chars\`;
-                document.getElementById('processingTime').textContent = \`\${processingTime}ms\`;
+                document.getElementById('responseLength').textContent = result.response_text.length + '/55 chars';
+                document.getElementById('processingTime').textContent = processingTime + 'ms';
 
                 // Show result section
                 document.getElementById('result').classList.add('show');
 
                 // Display logs
                 displayLogs(logs);
+
+                // Refresh diary entries display
+                loadEntries();
 
                 // Scroll to results
                 document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
@@ -954,6 +1067,55 @@ app.get('/', (req, res) => {
             document.getElementById('transcript').addEventListener('input', function() {
                 this.style.height = 'auto';
                 this.style.height = Math.max(120, this.scrollHeight) + 'px';
+            });
+
+            // Load and display diary entries
+            async function loadEntries() {
+                try {
+                    const response = await fetch('/api/entries');
+                    const data = await response.json();
+                    
+                    const entriesContainer = document.getElementById('entries');
+                    const entryCount = document.getElementById('entryCount');
+                    
+                    if (data.entries && data.entries.length > 0) {
+                        entryCount.textContent = data.entries.length;
+                        
+                        let entriesHtml = '';
+                        data.entries.forEach(function(entry) {
+                            const date = new Date(entry.timestamp).toLocaleString();
+                            let themesHtml = '';
+                            entry.themes.forEach(function(theme) {
+                                themesHtml += '<span class="entry-theme">' + theme + '</span>';
+                            });
+                            let vibesHtml = '';
+                            entry.vibes.forEach(function(vibe) {
+                                vibesHtml += '<span class="entry-vibe">' + vibe + '</span>';
+                            });
+                            
+                            entriesHtml += '<div class="entry-item">';
+                            entriesHtml += '<div class="entry-text">' + entry.text + '</div>';
+                            entriesHtml += '<div class="entry-meta">';
+                            entriesHtml += '<div class="entry-themes">' + themesHtml + vibesHtml + '</div>';
+                            entriesHtml += '<div style="color: #95a5a6;">' + date + '</div>';
+                            entriesHtml += '</div>';
+                            entriesHtml += '</div>';
+                        });
+                        
+                        entriesContainer.innerHTML = entriesHtml;
+                    } else {
+                        entryCount.textContent = '0';
+                        entriesContainer.innerHTML = '<div style="color: #95a5a6; text-align: center; padding: 20px;">No entries yet. Process some diary entries to see them here.</div>';
+                    }
+                } catch (error) {
+                    console.error('Error loading entries:', error);
+                    document.getElementById('entries').innerHTML = '<div style="color: #e74c3c; text-align: center; padding: 20px;">Error loading entries. Please try again.</div>';
+                }
+            }
+
+            // Load entries when page loads
+            document.addEventListener('DOMContentLoaded', function() {
+                loadEntries();
             });
         </script>
     </body>
@@ -1047,6 +1209,27 @@ app.post('/api/reset', (req, res) => {
     }
     catch (error) {
         console.error('Error resetting data:', error);
+        res.status(500).json({ error: getErrorMessage(error) });
+    }
+});
+// New endpoint to get all diary entries
+app.get('/api/entries', (req, res) => {
+    try {
+        // Import the entries from the pipeline module
+        const { getEntries } = require('./pipeline');
+        const entries = getEntries();
+        res.json({
+            entries: entries.map((entry) => ({
+                id: entry.id,
+                text: entry.raw_text,
+                timestamp: entry.timestamp,
+                themes: entry.parsed.theme,
+                vibes: entry.parsed.vibe
+            }))
+        });
+    }
+    catch (error) {
+        console.error('Error getting entries:', error);
         res.status(500).json({ error: getErrorMessage(error) });
     }
 });

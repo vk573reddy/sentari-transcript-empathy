@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.processTranscript = processTranscript;
 exports.generateMockEntries = generateMockEntries;
 exports.resetState = resetState;
+exports.getEntries = getEntries;
 exports.simulateFirst = simulateFirst;
 exports.simulateHundred = simulateHundred;
 const crypto_1 = require("crypto");
@@ -418,6 +419,12 @@ function resetState() {
         trait_pool: [],
         last_theme: ''
     };
+}
+/**
+ * Get all current diary entries
+ */
+function getEntries() {
+    return [...entries]; // Return a copy to prevent external modification
 }
 /**
  * Simulate first entry (no prior history)
