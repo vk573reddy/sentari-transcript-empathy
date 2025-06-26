@@ -189,7 +189,7 @@ export function parseEntry(text: string): ParsedEntry {
   if (lowerText.match(/\b(happy|joy|excited|cheerful|glad|pleased|delighted)\b/)) {
     vibes.push('happy');
   }
-  if (lowerText.match(/\b(anxious|worried|nervous|scared|afraid|fearful)\b/)) {
+  if (lowerText.match(/\b(anxious|nervous|scared|afraid|fearful)\b/)) {
     vibes.push('anxious');
   }
   if (lowerText.match(/\b(tired|exhausted|drained|weary|fatigued)\b/)) {
@@ -207,10 +207,14 @@ export function parseEntry(text: string): ParsedEntry {
   if (lowerText.match(/\b(motivated|driven|determined|ambitious|focused)\b/)) {
     vibes.push('driven');
   }
+  // 🆕 Add reflective vibe manually if worried is used but not in anxious
+  if (lowerText.match(/\b(worried)\b/)) {
+    vibes.push('reflective');
+  }
   if (vibes.length === 0) vibes.push('reflective');
 
   // Extract intent (what the person wants)
-  let intent = 'Process thoughts and feelings';
+  let intent = 'reflect';
 
   if (lowerText.match(/\b(need|want|hope|wish|plan)\b/)) {
     if (lowerText.includes('rest') || lowerText.includes('sleep') || lowerText.includes('break')) {
@@ -268,7 +272,7 @@ export function parseEntry(text: string): ParsedEntry {
   }
 
     // === INTENT DETECTION ===
-  intent = 'reflect';
+  //intent = 'reflect';
   if (lowerText.includes('call mom')) intent = 'call mom';
   else if (lowerText.includes('meeting')) intent = 'prepare for meeting';
   else if (lowerText.includes('study')) intent = 'study for exam';
@@ -284,8 +288,8 @@ export function parseEntry(text: string): ParsedEntry {
     vibe: vibes,
     intent,
     subtext,
-    persona_trait,
-    bucket
+    persona_trait: traits,
+    bucket: buckets
   };
 }
 
