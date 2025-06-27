@@ -44,16 +44,10 @@
 - **Real-world Testing**: Conducted extensive testing with actual user scenarios
 - **Performance Benchmarking**: Established performance baselines and monitoring
 
-
 ### **Ayushi** - Frontend Developer
 - **Voice Recording Interface**: Built an intuitive, responsive voice recording component with real-time feedback
-- **Transcription Display**: Implemented clean, readable diary entry display with formatting
-
-### **Lakshmi** - Voice Processing Lead
+- **Transcription Display**: Implemented clean, readable diary entry display with formatting and themes
 - **OpenAI Whisper Integration**: Seamless audio-to-text conversion with high accuracy
-- **Data Normalization**: Implemented robust transcript cleaning and normalization
-- **Preprocessing Pipeline**: Optimized data preparation for downstream AI analysis
-- **Audio Quality Enhancement**: Ensured consistent audio processing across different input sources
 
 ### **Vu** - AI/NLP Engineer
 - **Task Extraction**: Leveraged GPT to identify actionable tasks from diary entries
