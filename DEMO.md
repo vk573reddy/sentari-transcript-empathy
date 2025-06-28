@@ -47,7 +47,6 @@
 ### **Ayushi** - Frontend Developer
 - **Voice Recording Interface**: Built an intuitive, responsive voice recording component with real-time feedback
 - **Transcription Display**: Implemented clean, readable diary entry display with formatting and themes
-- **OpenAI Whisper Integration**: Seamless audio-to-text conversion with high accuracy
 
 ### **Vu** - AI/NLP Engineer
 - **Task Extraction**: Leveraged GPT to identify actionable tasks from diary entries
